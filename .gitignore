@@ -161,3 +161,5 @@ cython_debug/
 
 prompts.py
 .env
+api_google_client.json
+credentials.json
