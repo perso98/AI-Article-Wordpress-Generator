@@ -1,7 +1,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
 from src.utils import ensure_tags_exist
-
+import re
 from PIL import Image
 import io
 
@@ -50,6 +50,11 @@ def publish_to_wordpress(article, wordpress_url, username, password):
         return None
 
 
+import requests
+from requests.auth import HTTPBasicAuth
+from PIL import Image
+import io
+
 def upload_image_to_wordpress(image_url, wordpress_url, username, password):
     """
     Pobiera obraz ze wskazanego URL, konwertuje go na PNG i przesyła do WordPress,
@@ -59,27 +64,27 @@ def upload_image_to_wordpress(image_url, wordpress_url, username, password):
 
     try:
         # Pobranie obrazu z wygenerowanego URL
+        print(f"Pobieranie obrazu z URL: {image_url}")
         response = requests.get(image_url)
         response.raise_for_status()
         
-        # Konwersja na PNG (z użyciem Pillow)
+        # Konwersja na PNG za pomocą Pillow
+        print("Konwersja obrazu na PNG...")
         image_data = response.content
         image = Image.open(io.BytesIO(image_data)).convert('RGBA')
         output_buffer = io.BytesIO()
-        # Zapis do formatu PNG
         image.save(output_buffer, format='PNG')
         output_buffer.seek(0)
 
-        # Przygotowanie nazwy pliku (zastąp oryginalne rozszerzenie .webp -> .png)
+        # Przygotowanie nazwy pliku
         original_filename = image_url.split('/')[-1]
-        if '.' in original_filename:
-            filename_root = original_filename.rsplit('.', 1)[0]
-        else:
-            filename_root = original_filename
-
+        # Usuwanie parametrów GET i ograniczanie długości nazwy pliku
+        filename_root = re.sub(r'\?.*$', '', original_filename.rsplit('.', 1)[0])
+        filename_root = re.sub(r'[^a-zA-Z0-9_-]', '', filename_root)[:50]  # Usunięcie nieprawidłowych znaków i ograniczenie do 50 znaków
         filename_png = f"{filename_root}.png"
         
-        # Przesyłanie obrazu do WordPress (jako PNG)
+        # Przesyłanie obrazu do WordPress jako PNG
+        print(f"Przesyłanie obrazu do WordPress jako {filename_png}...")
         files = {
             "file": (filename_png, output_buffer, 'image/png')
         }
@@ -94,6 +99,7 @@ def upload_image_to_wordpress(image_url, wordpress_url, username, password):
             auth=HTTPBasicAuth(username, password)
         )
 
+        # Obsługa odpowiedzi WordPress
         if upload_response.status_code == 201:
             media_id = upload_response.json()["id"]
             print(f"Obraz przesłany poprawnie z ID: {media_id}")
@@ -103,10 +109,12 @@ def upload_image_to_wordpress(image_url, wordpress_url, username, password):
             print(upload_response.json())
             return None
 
+    except requests.RequestException as req_err:
+        print(f"Błąd HTTP podczas przesyłania obrazu: {req_err}")
     except Exception as e:
         print(f"Błąd podczas przesyłania obrazu: {e}")
-        return None
 
+    return None
 def fetch_wordpress_categories(wordpress_url, username, password):
     """
     Pobiera listę kategorii z WordPressa.

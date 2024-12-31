@@ -3,7 +3,7 @@ from PIL import Image
 import base64
 import io
 
-def generate_outline_with_openai(prompt, api_key, model="gpt-4"):
+def generate_outline_with_openai(prompt, api_key, model="gpt-4o"):
     try:
         openai.api_key = api_key
         response = openai.ChatCompletion.create(
@@ -20,7 +20,7 @@ def generate_outline_with_openai(prompt, api_key, model="gpt-4"):
         print(f"Błąd podczas generowania spisu treści z OpenAI: {e}")
         return ""
 
-def generate_section_content(prompt, api_key, model="gpt-3.5-turbo", max_tokens=3000):
+def generate_section_content(prompt, api_key, model="gpt-4o", max_tokens=3000):
     try:
         openai.api_key = api_key
         response = openai.ChatCompletion.create(
@@ -43,16 +43,19 @@ def generate_cover_image(keyword, api_key):
         f"Stwórz szczegółowy opis graficzny dla artykułu na temat '{keyword}'. "
         f"Okładka powinna być estetyczna, nowoczesna i inspirowana tematem: {keyword}. "
         f"Unikaj tekstu na grafice."
+        f"To powinien być krótki opis na 2 zdania."
+        f"Twoim outputem ma być tylko opis obrazka, nic nie dodawaj od siebie."
+        f"Zacznij od: Stwórz grafikę realistyczną hd..."
     )
     try:
         # Generowanie opisu obrazu
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "Jesteś ekspertem od tworzenia opisów obrazów."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=200,
+            max_tokens=500,
             temperature=0.5
         )
         image_description = response["choices"][0]["message"]["content"].strip()

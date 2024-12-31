@@ -1,4 +1,4 @@
-from dotenv import load_dotenv 
+from dotenv import load_dotenv  
 import os
 from src.utils import fetch_sitemap_links, fetch_google_sheet_with_service_account, format_date_for_wordpress, update_google_sheet_row
 from src.openai_integration import generate_outline_with_openai, generate_section_content, generate_cover_image
@@ -56,17 +56,18 @@ if not filtered_data:
 
 categories = fetch_wordpress_categories(wordpress_link, wordpress_username, wordpress_password)
 print(categories)
+
 for row in filtered_data:
     keyword = row.get("Main Keyword")
     date = row.get("Date")
     row_index = row.get("rowIndex")  # Pobranie indeksu wiersza
 
-    if not keyword or not  date:
+    if not keyword or not date:
         print(f"Pominięto wiersz: {row}")
         continue
 
     print(f"Generowanie treści dla słowa kluczowego: {keyword}...")
-    outline = generate_outline_with_openai(outline_prompt(keyword, links,categories), openai_api_key)
+    outline = generate_outline_with_openai(outline_prompt(keyword, links, categories), openai_api_key)
     print(f"\nOutline wygenerowany dla '{keyword}':\n{outline}\n")
 
     try:
@@ -85,17 +86,25 @@ for row in filtered_data:
 
     final_content = "\n".join(sections_content).replace("\n\n", "\n").strip()
 
-    print(f"Generowanie okładki dla '{keyword}'...")
-    cover_image_url = generate_cover_image(keyword, openai_api_key)
+    cover_image_url = None
+    for attempt in range(3):  # Maksymalnie 3 próby generacji obrazu
+        print(f"Próba {attempt + 1}: Generowanie okładki dla '{keyword}'...")
+        cover_image_url = generate_cover_image(keyword, openai_api_key)
+        if cover_image_url:
+            break
+        print(f"Nie udało się wygenerować obrazu dla '{keyword}'. Próba {attempt + 1} nieudana.")
 
+    cover_image_id = None
     if cover_image_url:
-        cover_image_id = upload_image_to_wordpress(
-            cover_image_url, wordpress_link, wordpress_username, wordpress_password
-        )
-        print(f"Obraz okładki przesłany z ID: {cover_image_id}")
-    else:
-        print(f"Nie udało się wygenerować obrazu dla '{keyword}'.")
-        cover_image_id = None
+        for attempt in range(3):  # Maksymalnie 3 próby przesyłania obrazu do WordPress
+            print(f"Próba {attempt + 1}: Przesyłanie obrazu do WordPress...")
+            cover_image_id = upload_image_to_wordpress(
+                cover_image_url, wordpress_link, wordpress_username, wordpress_password
+            )
+            if cover_image_id:
+                print(f"Obraz przesłany poprawnie z ID: {cover_image_id}")
+                break
+            print(f"Próba {attempt + 1}: Nie udało się przesłać obrazu do WordPress.")
 
     article_json = {
         "title": outline_data.get("title", "Artykuł bez tytułu"),
@@ -107,7 +116,13 @@ for row in filtered_data:
         "featured_media": cover_image_id,  # Ustawienie ID grafiki jako okładki
     }
 
-    result = publish_to_wordpress(article_json, wordpress_link, wordpress_username, wordpress_password)
+    result = None
+    for attempt in range(3):  # Maksymalnie 3 próby publikacji artykułu
+        print(f"Próba {attempt + 1}: Publikacja artykułu '{article_json['title']}'...")
+        result = publish_to_wordpress(article_json, wordpress_link, wordpress_username, wordpress_password)
+        if result:
+            break
+        print(f"Próba {attempt + 1}: Nie udało się opublikować artykułu.")
 
     if result:
         print(f"Artykuł '{article_json['title']}' opublikowany pomyślnie.")
