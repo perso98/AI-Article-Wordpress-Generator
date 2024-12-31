@@ -1,4 +1,4 @@
-from dotenv import load_dotenv  
+from dotenv import load_dotenv
 import os
 from src.utils import fetch_sitemap_links, fetch_google_sheet_with_service_account, format_date_for_wordpress, update_google_sheet_row
 from src.openai_integration import generate_outline_with_openai, generate_section_content, generate_cover_image
@@ -76,6 +76,7 @@ for row in filtered_data:
         print(f"Błąd parsowania JSON dla '{keyword}': {e}")
         continue
 
+    # Generowanie sekcji treści
     sections_content = []
     for section in outline_data.get("sections", []):
         section_title = section.get("title", "Sekcja bez tytułu")
@@ -84,8 +85,12 @@ for row in filtered_data:
         content = generate_section_content(prompt, openai_api_key)
         sections_content.append(content)
 
-    final_content = "\n".join(sections_content).replace("\n\n", "\n").strip()
+    introduction = outline_data.get("introduction", "")
 
+    # Dodanie wstępu do początku treści artykułu
+    final_content = introduction+ "\n".join(sections_content).replace("\n\n", "\n").strip()
+
+    # Generowanie obrazu okładki
     cover_image_url = None
     for attempt in range(3):  # Maksymalnie 3 próby generacji obrazu
         print(f"Próba {attempt + 1}: Generowanie okładki dla '{keyword}'...")
@@ -94,6 +99,7 @@ for row in filtered_data:
             break
         print(f"Nie udało się wygenerować obrazu dla '{keyword}'. Próba {attempt + 1} nieudana.")
 
+    # Przesyłanie obrazu do WordPress
     cover_image_id = None
     if cover_image_url:
         for attempt in range(3):  # Maksymalnie 3 próby przesyłania obrazu do WordPress
@@ -106,6 +112,7 @@ for row in filtered_data:
                 break
             print(f"Próba {attempt + 1}: Nie udało się przesłać obrazu do WordPress.")
 
+    # Przygotowanie danych do publikacji
     article_json = {
         "title": outline_data.get("title", "Artykuł bez tytułu"),
         "slug": outline_data.get("slug", "brak-sluga"),
@@ -116,6 +123,7 @@ for row in filtered_data:
         "featured_media": cover_image_id,  # Ustawienie ID grafiki jako okładki
     }
 
+    # Publikacja artykułu w WordPress
     result = None
     for attempt in range(3):  # Maksymalnie 3 próby publikacji artykułu
         print(f"Próba {attempt + 1}: Publikacja artykułu '{article_json['title']}'...")
