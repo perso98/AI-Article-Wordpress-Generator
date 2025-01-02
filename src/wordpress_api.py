@@ -138,3 +138,6 @@ def fetch_wordpress_categories(wordpress_url, username, password):
     except requests.RequestException as e:
         print(f"Błąd podczas pobierania kategorii: {e}")
         return []
+    
+    
+    

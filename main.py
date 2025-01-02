@@ -1,11 +1,11 @@
 from dotenv import load_dotenv
 import os
 from src.utils import fetch_sitemap_links, fetch_google_sheet_with_service_account, format_date_for_wordpress, update_google_sheet_row
-from src.openai_integration import generate_outline_with_openai, generate_section_content, generate_cover_image
+from src.openai_integration import generate_outline_with_openai, generate_section_content, generate_cover_image, generate_summary_and_faq
 from src.wordpress_api import publish_to_wordpress, upload_image_to_wordpress, fetch_wordpress_categories
-from prompts import outline_prompt, section_prompt
+from prompts import outline_prompt, section_prompt, image_prompt, summary_and_faq_prompt
 import json
-
+from bs4 import BeautifulSoup
 # Wczytanie zmiennych z .env
 load_dotenv()
 
@@ -75,26 +75,38 @@ for row in filtered_data:
     except json.JSONDecodeError as e:
         print(f"Błąd parsowania JSON dla '{keyword}': {e}")
         continue
-
+    
     # Generowanie sekcji treści
     sections_content = []
-    for section in outline_data.get("sections", []):
+    for section in outline_data.get("sections"):
         section_title = section.get("title", "Sekcja bez tytułu")
-        prompt = section_prompt(section)
+        prompt_for_section = section_prompt(section, outline_data.get("title"))
         print(f"Generowanie treści dla sekcji: {section_title}...")
-        content = generate_section_content(prompt, openai_api_key)
+        content = generate_section_content(prompt_for_section, openai_api_key)
         sections_content.append(content)
 
     introduction = outline_data.get("introduction", "")
 
     # Dodanie wstępu do początku treści artykułu
     final_content = introduction+ "\n".join(sections_content).replace("\n\n", "\n").strip()
+    # 1) Parsujemy HTML -> tekst
+    parsed_text = BeautifulSoup(final_content, "html.parser").get_text(" ", strip=True)
 
+    # 2) Wywołujemy nową funkcję do wygenerowania HTML z podsumowaniem i FAQ
+    print("Generowanie Podsumowania + FAQ...")
+    prompt_for_summary_and_faq = summary_and_faq_prompt(parsed_text)
+    summary_and_faq_html = generate_summary_and_faq(prompt_for_summary_and_faq, openai_api_key)
+
+    # 3) Dodajemy to do final_content
+    #    (jeśli summary_and_faq_html jest puste, nic się nie stanie)
+    final_content += "\n" + summary_and_faq_html
+    print(outline_data.get("title") + final_content)
     # Generowanie obrazu okładki
     cover_image_url = None
     for attempt in range(3):  # Maksymalnie 3 próby generacji obrazu
         print(f"Próba {attempt + 1}: Generowanie okładki dla '{keyword}'...")
-        cover_image_url = generate_cover_image(keyword, openai_api_key)
+        cover_image_prompt = image_prompt(keyword)
+        cover_image_url = generate_cover_image(cover_image_prompt , openai_api_key)
         if cover_image_url:
             break
         print(f"Nie udało się wygenerować obrazu dla '{keyword}'. Próba {attempt + 1} nieudana.")
@@ -114,7 +126,7 @@ for row in filtered_data:
 
     # Przygotowanie danych do publikacji
     article_json = {
-        "title": outline_data.get("title", "Artykuł bez tytułu"),
+        "title": outline_data.get("title"),
         "slug": outline_data.get("slug", "brak-sluga"),
         "tags": outline_data.get("tags", []),
         "categories": outline_data.get("categories", []),
