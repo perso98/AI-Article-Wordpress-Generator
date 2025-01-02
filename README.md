@@ -21,6 +21,7 @@ Ten projekt automatyzuje tworzenie, zarządzanie i publikację treści na blogu 
 - **Integracja z WordPress**: Publikuje artykuły z okładką, tagami i kategoriami, ustawia na dacie która była w kolumne *DATE* w Google Sheets.
 
 Program generuje artykuł o wielkości około 4500 - 5000 słów.
+Koszty api na modelu gpt-4o to około 15centów/artykuł.
 Przykład wygenerowanego artykułu:
   ```html
   <h1>Stoicyzm a wiara w Boga: Harmonia między filozofią a duchowością</h1>
