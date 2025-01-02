@@ -18,7 +18,7 @@ Ten projekt automatyzuje tworzenie, zarządzanie i publikację treści na blogu 
 - Dobiera odpowiednią kategorię a także tagi do artykułu:
   ![image](https://github.com/user-attachments/assets/833bf01c-404c-4fdf-b31f-4c6ca05b582e)
 
-- **Integracja z WordPress**: Publikuje artykuły z grafikami, tagami i kategoriami.
+- **Integracja z WordPress**: Publikuje artykuły z okładką, tagami i kategoriami, ustawia na dacie która była w kolumne *DATE* w Google Sheets.
 
 Program generuje artykuł o wielkości około 4500 - 5000 słów.
 Przykład wygenerowanego artykułu:
