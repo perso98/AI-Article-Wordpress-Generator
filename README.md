@@ -12,10 +12,12 @@ Ten projekt automatyzuje tworzenie, zarządzanie i publikację treści na blogu 
 - **Generowanie obrazów**: Tworzy okładki za pomocą DALL·E.
 - **Integracja z Google Sheets**: Pobiera pomysły na artykuły i aktualizuje status publikacji.
   Oto wygląd tego Google Sheets:
+  
   ![image](https://github.com/user-attachments/assets/1ea4c51b-1fff-42e3-8f99-ea15affd099a)
 
   Kolumna *Status* ukazuje, czy artykuł został juz wygenerowany, jeśli jest pusty i ma *DATE* to będzie go robić.
 - Dobiera odpowiednią kategorię a także tagi do artykułu:
+  
   ![image](https://github.com/user-attachments/assets/833bf01c-404c-4fdf-b31f-4c6ca05b582e)
 
 - **Integracja z WordPress**: Publikuje artykuły z okładką, tagami i kategoriami, ustawia na dacie która była w kolumne *DATE* w Google Sheets.
