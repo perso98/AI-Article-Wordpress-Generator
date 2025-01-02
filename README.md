@@ -1,5 +1,5 @@
 
-#AI-Article-Wordpress-Generator
+# AI-Article-Wordpress-Generator
 
 ## Opis Projektu
 Ten projekt automatyzuje tworzenie, zarządzanie i publikację treści na blogu WordPress. Dzięki wykorzystaniu OpenAI GPT i DALL·E, generuje atrakcyjne artykuły, konspekty oraz okładki. Integracja z Google Sheets i WordPress REST API umożliwia płynne publikowanie treści.
