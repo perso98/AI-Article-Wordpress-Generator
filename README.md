@@ -23,7 +23,6 @@ Ten projekt automatyzuje tworzenie, zarządzanie i publikację treści na blogu 
 Program generuje artykuł o wielkości około 4500 - 5000 słów.
 Przykład wygenerowanego artykułu:
   ```html
-<div class="example">
   <h1>Stoicyzm a wiara w Boga: Harmonia między filozofią a duchowością</h1>
 <p><strong>Stoicyzm</strong> i <em>wiara w Boga</em> to tematy, które od wieków fascynują filozofów i teologów. Czy można połączyć racjonalność stoickiej filozofii z duchowym wymiarem wiary? W tym artykule odkryjesz, jak te dwa światy mogą współistnieć, jakie są ich wspólne wartości i czym różnią się w podejściu do życia. Dowiedz się, jak stoickie zasady mogą wzbogacić Twoją duchowość!</p><h2>Czym jest stoicyzm i jakie są jego podstawowe zasady?</h2>
 <h3>Krótka historia stoicyzmu</h3>
@@ -252,7 +251,6 @@ Podsumowując, wiara – czy to w ramach religii, czy poza nią – jest jak kom
 
 <h3>Dlaczego warto łączyć stoicyzm z duchowością?</h3>
 <p>Łączenie stoicyzmu z duchowością pozwala czerpać zarówno z racjonalnych narzędzi zarządzania emocjami, jak i z duchowej nadziei i sensu. Dzięki temu można osiągnąć pełniejszą harmonię w życiu codziennym.</p>
-</div>
 ```
 
 
